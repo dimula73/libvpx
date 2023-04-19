@@ -1,0 +1,60 @@
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index 4bf090f00..183bfe725 100644
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -75,8 +75,7 @@ Build options:
+   --extra-cflags=ECFLAGS      add ECFLAGS to CFLAGS [$CFLAGS]
+   --extra-cxxflags=ECXXFLAGS  add ECXXFLAGS to CXXFLAGS [$CXXFLAGS]
+   ${toggle_extra_warnings}    emit harmless warnings (always non-fatal)
+-  ${toggle_werror}            treat warnings as errors, if possible
+-                              (not available with all compilers)
++  ${toggle_werror}            treat warnings as errors, if possible (not available with all compilers)
+   ${toggle_optimizations}     turn on/off compiler optimization flags
+   ${toggle_pic}               turn on/off Position Independent Code
+   ${toggle_ccache}            turn on/off compiler cache
+@@ -84,8 +83,7 @@ Build options:
+   ${toggle_gprof}             enable/disable gprof profiling instrumentation
+   ${toggle_gcov}              enable/disable gcov coverage instrumentation
+   ${toggle_thumb}             enable/disable building arm assembly in thumb mode
+-  ${toggle_dependency_tracking}
+-                              disable to speed up one-time build
++  ${toggle_dependency_tracking} disable to speed up one-time build
+ 
+ Install options:
+   ${toggle_install_docs}      control whether docs are installed
+diff --git a/configure b/configure
+index ae289f77b..094194fca 100755
+--- a/configure
++++ b/configure
+@@ -35,9 +35,7 @@ Advanced options:
+   ${toggle_debug_libs}            in/exclude debug version of libraries
+   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
+   ${toggle_vp9_highbitdepth}      use VP9 high bit depth (10/12) profiles
+-  ${toggle_better_hw_compatibility}
+-                                  enable encoder to produce streams with better
+-                                  hardware decoder compatibility
++  ${toggle_better_hw_compatibility} enable encoder to produce streams with better hardware decoder compatibility
+   ${toggle_vp8}                   VP8 codec support
+   ${toggle_vp9}                   VP9 codec support
+   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
+@@ -48,9 +46,7 @@ Advanced options:
+   ${toggle_realtime_only}         enable this option while building for real-time encoding
+   ${toggle_onthefly_bitpacking}   enable on-the-fly bitpacking in real-time encoding
+   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
+-  ${toggle_coefficient_range_checking}
+-                                  enable decoder to check if intermediate
+-                                  transform coefficients are in valid range
++  ${toggle_coefficient_range_checking} enable decoder to check if intermediate transform coefficients are in valid range
+   ${toggle_runtime_cpu_detect}    runtime cpu detection
+   ${toggle_shared}                shared library support
+   ${toggle_static}                static library support
+@@ -58,8 +54,7 @@ Advanced options:
+   ${toggle_postproc_visualizer}   macro block / block level visualizers
+   ${toggle_multi_res_encoding}    enable multiple-resolution encoding
+   ${toggle_temporal_denoising}    enable temporal denoising and disable the spatial denoiser
+-  ${toggle_vp9_temporal_denoising}
+-                                  enable vp9 temporal denoising
++  ${toggle_vp9_temporal_denoising} enable vp9 temporal denoising
+   ${toggle_webm_io}               enable input from and output to WebM container
+   ${toggle_libyuv}                enable libyuv
+ 

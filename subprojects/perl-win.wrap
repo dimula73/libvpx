@@ -1,0 +1,10 @@
+[wrap-file]
+directory = strawberry-perl-5.32.1.1-32bit-portable
+source_url = https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-32bit-portable.zip
+source_filename = strawberry-perl-5.32.1.1-32bit-portable.zip
+source_hash = d9c5711d12573a0f6d977792caa58364b1d46217521ae5c25cf5cc378a7c23c0
+patch_directory = perl
+lead_directory_missing = true
+
+[provide]
+program_names = perl_windows_exe
