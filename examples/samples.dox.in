@@ -1,0 +1,14 @@
+/*!\page samples Sample Code
+    This SDK includes a number of sample applications.
+    Each sample documents a feature of the SDK in both prose
+    and the associated C code.
+    The following samples are included: 
+@examples_subpages@
+
+    In addition, the SDK contains a number of utilities.
+    Since these utilities are built upon the concepts described
+    in the sample code listed above, they are not documented in
+    pieces like the samples are. Their source is included here
+    for reference. The following utilities are included:
+@utils_subpages@
+*/

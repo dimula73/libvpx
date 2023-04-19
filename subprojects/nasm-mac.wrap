@@ -1,0 +1,9 @@
+[wrap-file]
+directory = nasm-2.16.01
+source_url = https://www.nasm.us/pub/nasm/releasebuilds/2.16.01/macosx/nasm-2.16.01-macosx.zip
+source_filename = nasm-2.16.01-macosx.zip
+source_hash = d53c9a1bc9cd92d22e37924d31e9c68413fa03104fd165a6e7b7faf8800a1822
+patch_directory = nasm
+
+[provide]
+program_names = nasm_macos_exe
