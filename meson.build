@@ -309,18 +309,11 @@ MESON_OPTIONS = [
 	'install_docs',
 	'install_bins',
 	'install_libs',
-	'libs',
-	'examples',
-	'tools',
-	'docs',
-	'unit_tests',
 	'decode_perf_tests',
 	'encode_perf_tests',
 	'codec_srcs',
 	'vp9_highbitdepth',
 	'better_hw_compatibility',
-	'vp8',
-	'vp9',
 	'internal_stats',
 	'postproc',
 	'vp9_postproc',
@@ -337,6 +330,16 @@ MESON_OPTIONS = [
 	'vp9_temporal_denoising',
 	'webm_io',
 	'libyuv',
+]
+
+MESON_FEATURES = [
+	'libs',
+	'examples',
+	'tools',
+	'docs',
+	'unit_tests',
+	'vp8',
+	'vp9',
 	'vp8_encoder',
 	'vp8_decoder',
 	'vp9_encoder',
@@ -347,16 +350,6 @@ MESON_OPTIONS = [
 VAR_LIST = []
 
 # process #
-
-if not get_option('auto_features').auto()
-	error('''
-		libvpx relies on feature options to enable components conditionally.
-		If you need to disable features manually, please use:
-		- the individual toggles,
-		- the enable_features and disable_features string options, for conditional setting
-		- the force_enable_features and force_enable_features string options, for forcing a value irrespective of the architecture configuration.
-	''')
-endif
 
 ## process_cmdline ##
 
@@ -372,10 +365,15 @@ tune_cpu = ''
 foreach flag: CMDLINE_SELECT
 	if IGNORE_MESON_BUILTINS.contains(flag)
 		continue
-	elif MESON_OPTIONS.contains(flag)
+	elif MESON_FEATURES.contains(flag)
 		value = get_option(flag)
 		if not value.auto()
 			features.set(flag, value.enabled())
+		endif
+	elif MESON_OPTIONS.contains(flag)
+		value = get_option(flag)
+		if value != 'auto'
+			features.set(flag, value == 'enabled')
 		endif
 	elif flag == 'size_limit'
 		size_limit_value = get_option('size_limit')
