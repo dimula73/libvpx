@@ -94,6 +94,20 @@ MESON_HANDLED_OPTIONS = [
 	'install_srcs',
 ]
 
+FEATURES = [
+	'vp8',
+	'vp9',
+	'vp8_encoder',
+	'vp8_decoder',
+	'vp9_encoder',
+	'vp9_decoder',
+	'libs',
+	'examples',
+	'tools',
+	'docs',
+	'unit_tests',
+]
+
 def filter_meson_handled_options(pair) -> bool:
 	k, _v = pair
 	return k not in MESON_HANDLED_OPTIONS
@@ -117,7 +131,10 @@ def update_meson_options(options: dict):
 							value = f"value: '{kv['value']}', "
 						else:
 							value = ''
-						lines.append(f"option('{key}', type: 'feature', {value}description: '{kv['description']}')\n")
+						if key in FEATURES:
+							lines.append(f"option('{key}', type: 'feature', {value}description: '{kv['description']}')\n")
+						else:
+							lines.append(f"option('{key}', type: 'combo', choices: ['auto', 'enabled', 'disabled'], {value}description: '{kv['description']}')\n")
 					else:
 						if kv.get('value') and len(kv['value']) != 0:
 							value = f"value: '{kv['value']}', "
@@ -136,7 +153,8 @@ def update_meson_options(options: dict):
 def update_meson_build(options: dict):
 	has_generated = False
 	lines = []
-	booleans = [i for i in options.keys() if options.get(i)['type'] == 'boolean']
+	features = [i for i in options.keys() if options.get(i)['type'] == 'boolean' and i in FEATURES]
+	booleans = [i for i in options.keys() if options.get(i)['type'] == 'boolean' and i not in FEATURES]
 	with open('meson.build', 'r', encoding='utf-8') as meson_file:
 		opening = '#### --- GENERATED EXTERN OPTIONS --- ####\n'
 		closing = opening.replace('GENERATED', 'END GENERATED')
@@ -151,7 +169,12 @@ def update_meson_build(options: dict):
 				lines.append('\n')
 				lines.append('MESON_OPTIONS = [\n')
 				for i in booleans:
-					lines.append(f"\t'{i}',\n")
+					lines.append(f"\t'{i}',\n") 
+				lines.append(']\n')
+				lines.append('\n')
+				lines.append('MESON_FEATURES = [\n')
+				for i in features:
+					lines.append(f"\t'{i}',\n") 
 				lines.append(']\n')
 			elif l == closing:
 				lines.append(l)
