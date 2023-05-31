@@ -1196,7 +1196,7 @@ if features.get('linux', false)
 	)
 elif tgt_os == 'android'
 	api_level = c.get_define('__ANDROID_API__')
-	if api_level.version_compare('< 24') and tgt_isa == 'armv7'
+	if api_level.version_compare('< 24') and (tgt_isa == 'armv7' or tgt_isa == 'x86')
 		warning('Disabling transparent large-file-support for Android API < 24 on armv7-a')
 		add_project_arguments(
 			'-U_FILE_OFFSET_BITS',
