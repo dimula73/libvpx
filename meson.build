@@ -935,6 +935,11 @@ elif tgt_isa.startswith('x86')
 		bits = 64
 	endif
 
+	if target_machine.cpu_family() == 'x86'
+		warning('Force-enable PIC for asm code on 32-bit x86')
+		features.set('pic', true)
+	endif
+
 	feature = 'runtime_cpu_detect'
 	if features.get(feature, true) # soft_enabled
 		if not features.has(feature)
