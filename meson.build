@@ -676,7 +676,7 @@ if tgt_isa.startswith('arm')
 			endif
 		endif
 
-		asm_conversion_exe = find_program('build/make/ads2gas.pl', required: true)
+		asm_conversion_exe = find_program('build/make/ads2gas.py', required: true)
 		asm_conversion_cmd = []
 		as_sfx = '.S'
 
