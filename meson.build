@@ -1761,7 +1761,7 @@ libvpx_dep = declare_dependency(
 	include_directories: include_directories('.'),
 )
 
-meson.override_dependency('libvpx', libvpx_dep)
+meson.override_dependency('vpx', libvpx_dep)
 
 pkg = import('pkgconfig')
 
