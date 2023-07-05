@@ -697,7 +697,7 @@ if tgt_isa.startswith('arm')
 		# and so can be selected as 'win32'.
 
 		if tgt_isa == 'armv7'
-			asm_conversion_exe = find_program('build/make/ads2armasm_ms.pl', required: true)
+			asm_conversion_exe = find_program('build/make/ads2armasm_ms.py', required: true)
 			asm_conversion_cmd = []
 			as_sfx = '.masm'
 			features.set('multithread', false)
