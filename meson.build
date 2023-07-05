@@ -770,7 +770,7 @@ if tgt_isa.startswith('arm')
 		endif
 
 		# Darwin toolchain and embed-bitcode options are Meson handled.
-		asm_conversion_exe = find_program('build/make/ads2gas_apple.pl', required: true)
+		asm_conversion_exe = find_program('build/make/ads2gas_apple.py', required: true)
 		asm_conversion_cmd = []
 	elif tgt_os == 'linux'
 		features.set('linux', true)
