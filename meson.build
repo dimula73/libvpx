@@ -50,14 +50,6 @@ foreach t : all_targets
 	features.set(t, true)
 endforeach
 
-# we don't use diff in Meson.
-perl_executables = ['perl']
-# Adding Meson overrides manually.
-if host_machine.system() == 'windows'
-	perl_executables += ['perl_windows_exe']
-endif
-perl_exe = find_program(perl_executables, required: true)
-
 doxygen = find_program('doxygen', required: false, disabler: true)
 
 if doxygen.found()
@@ -1548,7 +1540,7 @@ vpx_config_c = configure_file(
 
 # libs.mk
 
-rtcd_exe = find_program('build/make/rtcd.pl', required: true)
+rtcd_exe = find_program('build/make/rtcd.py', required: true)
 
 extra_libs += c.find_library('m', required: false)
 

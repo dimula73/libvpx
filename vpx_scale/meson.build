@@ -62,7 +62,7 @@ foreach comp_name, comp_sources : optional_sources
 endforeach
 
 vpx_scale_rtcd_defs = files(
-	'vpx_scale_rtcd.pl',
+	'vpx_scale_rtcd.py',
 )
 
 codec_rtcds += {

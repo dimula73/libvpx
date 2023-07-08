@@ -1196,7 +1196,7 @@ foreach comp_name, comp_sources : optional_sources
 endforeach
 
 vpx_dsp_rtcd_defs = files(
-	'vpx_dsp_rtcd_defs.pl',
+	'vpx_dsp_rtcd_defs.py',
 )
 
 codec_rtcds += {

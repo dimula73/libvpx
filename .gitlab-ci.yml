@@ -27,7 +27,6 @@ stages:
       ninja-build
       build-essential
       yasm
-      perl
       git
 
 .container.debian@common.minimum:
@@ -107,7 +106,6 @@ with deps nasm:
       ninja-build
       build-essential
       yasm
-      perl
       git
 
 # UNCOMMENT when the following is fixed:
@@ -148,7 +146,6 @@ with deps nasm:
     key:
       files:
         - subprojects/nasm-win.wrap
-        - subprojects/perl-win.wrap
       prefix: $CI_JOB_NAME
   variables:
     # Make sure any failure in PowerShell scripts is fatal
@@ -164,7 +161,7 @@ with deps nasm:
     - pip3 install -U meson
   script:
     # HACK to sneak Nasm and Perl under Meson's nose.
-    - $env:PATH="$(pwd)\subprojects\nasm-2.16.01;$(pwd)\subprojects\strawberry-perl-5.32.1.1-32bit-portable\perl\bin;$env:PATH"
+    - $env:PATH="$(pwd)\subprojects\nasm-2.16.01;$env:PATH"
     # For some reason, options are separated by newline instead of space, so we
     # have to replace them first.
     # - $env:MESON_ARGS = $env:MESON_ARGS.replace("`n"," ")
@@ -285,7 +282,7 @@ iOS arm64 cross:
     TOOLCHAIN: "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64"
     NASM: "/usr/bin/nasm"
   before_script:
-    - dnf install -y python3-pip binutils nasm gcc ninja-build perl-core
+    - dnf install -y python3-pip binutils nasm gcc ninja-build
     - pip3 install -U meson
   script:
     - |
