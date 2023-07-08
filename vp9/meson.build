@@ -573,14 +573,13 @@ if features.get('vp9_encoder', false)
 	endforeach
 endif
 
-vp9_rtcd_defs = files(
-	'common/vp9_rtcd_defs.py',
-)
+vp9_rtcd_defs = meson.current_source_dir() / 'common/vp9_rtcd_defs.py'
+
 codec_rtcds += {
-	'vp9_rtcd': vp9_rtcd_defs[0]
+	'vp9_rtcd': vp9_rtcd_defs
 }
 
-codec_headers += vp9_rtcd_defs
+codec_headers += files(vp9_rtcd_defs)
 
 if features.get('vp9_encoder', false)
 	codec_exports += files(

@@ -531,15 +531,13 @@ if features.get('vp8_encoder', false)
 	endforeach
 endif
 
-vp8_rtcd_defs = files(
-	'common/rtcd_defs.py',
-)
+vp8_rtcd_defs = meson.current_source_dir() / 'common/rtcd_defs.py'
 
 codec_rtcds += {
-	'vp8_rtcd': vp8_rtcd_defs[0]
+	'vp8_rtcd': vp8_rtcd_defs
 }
 
-codec_headers += vp8_rtcd_defs
+codec_headers += files(vp8_rtcd_defs)
 
 if features.get('vp8_encoder', false)
 	codec_exports += files(

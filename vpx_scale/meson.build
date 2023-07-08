@@ -61,11 +61,9 @@ foreach comp_name, comp_sources : optional_sources
 	endif
 endforeach
 
-vpx_scale_rtcd_defs = files(
-	'vpx_scale_rtcd.py',
-)
+vpx_scale_rtcd_defs = meson.current_source_dir() / 'vpx_scale_rtcd.py'
 
 codec_rtcds += {
-	'vpx_scale_rtcd': vpx_scale_rtcd_defs[0]
+	'vpx_scale_rtcd': vpx_scale_rtcd_defs
 }
-codec_headers += vpx_scale_rtcd_defs
+codec_headers += files(vpx_scale_rtcd_defs)
