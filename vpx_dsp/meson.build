@@ -1195,12 +1195,10 @@ foreach comp_name, comp_sources : optional_sources
 	endif
 endforeach
 
-vpx_dsp_rtcd_defs = files(
-	'vpx_dsp_rtcd_defs.py',
-)
+vpx_dsp_rtcd_defs = meson.current_source_dir() / 'vpx_dsp_rtcd_defs.py'
 
 codec_rtcds += {
-	'vpx_dsp_rtcd': vpx_dsp_rtcd_defs[0]
+	'vpx_dsp_rtcd': vpx_dsp_rtcd_defs
 }
 
-codec_headers += vpx_dsp_rtcd_defs
+codec_headers += files(vpx_dsp_rtcd_defs)

@@ -1638,7 +1638,7 @@ else
 	)
 endif
 
-rtcd_h_template = [rtcd_exe, '--arch=@0@'.format(tgt_isa), '--config=@INPUT0@'] + rtcd_options
+rtcd_h_template = ['--arch=@0@'.format(tgt_isa), '--config=@INPUT0@'] + rtcd_options
 
 doxy_template = find_program('meson/generate_doxy.py', required: true)
 
@@ -1660,17 +1660,45 @@ subdir('vpx_util')
 subdir('vp8')
 subdir('vp9')
 
+# Meson: allow validation of original rtcd headers
+perl_exe = find_program('perl', required: false)
+diff_exe = find_program('diff', required: false)
+original_rtcd_exe = find_program('build/make/rtcd.pl', required: perl_exe.found() and diff_exe.found())
+
 foreach symbol, input_file : codec_rtcds
 	rtcd_filename = '@0@.h'.format(symbol)
+
+	rtcd_py = files(input_file)
+
 	rtcd_h = configure_file(
-		command: rtcd_h_template + ['--sym=@0@'.format(symbol), '@INPUT1@'],
-		input: [config_mk, input_file],
+		command: [rtcd_exe] + rtcd_h_template + ['--sym=@0@'.format(symbol), '@INPUT1@'],
+		input: [config_mk] + rtcd_py,
 		output: rtcd_filename,
 		capture: true,
 	)
 
 	codec_srcs += rtcd_h
 	codec_arch_prereqs += rtcd_h
+
+	if perl_exe.found() and diff_exe.found()
+		original_rtcd_pl = files(
+			input_file.replace('.py', '.pl')
+		)
+
+		original_rtcd_h = configure_file(
+			command: [original_rtcd_exe] + rtcd_h_template + ['--sym=@0@'.format(symbol), '@INPUT1@'],
+			input: [config_mk] + original_rtcd_pl,
+			output: 'original@0@'.format(rtcd_filename),
+			capture: true,
+		)
+
+		test('@0@'.format(symbol),
+			diff_exe,
+			args: ['-u', rtcd_h, original_rtcd_h],
+			verbose: true,
+			suite: 'validate_rtcd'
+		)
+	endif
 endforeach
 
 gen_def_exe = find_program('meson/gen_def.py', required: true)
