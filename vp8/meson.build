@@ -532,7 +532,7 @@ if features.get('vp8_encoder', false)
 endif
 
 vp8_rtcd_defs = files(
-	'common/rtcd_defs.pl',
+	'common/rtcd_defs.py',
 )
 
 codec_rtcds += {

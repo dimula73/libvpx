@@ -574,7 +574,7 @@ if features.get('vp9_encoder', false)
 endif
 
 vp9_rtcd_defs = files(
-	'common/vp9_rtcd_defs.pl',
+	'common/vp9_rtcd_defs.py',
 )
 codec_rtcds += {
 	'vp9_rtcd': vp9_rtcd_defs[0]
