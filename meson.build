@@ -461,7 +461,7 @@ foreach feature: disable_features
 			features.set('@0@_decoder'.format(feature), false)
 		endif
 	elif ARCH_EXT_LIST.contains(feature)
-		rtcd_options += ['--disable-@0@'.format(feature)]
+		rtcd_options += ['--disable', feature]
 	elif features.get(feature, true) # action == disable and not disabled
 		if not CMDLINE_SELECT.contains(feature)
 			error('Unknown option @0@'.format(feature))
@@ -857,7 +857,7 @@ elif tgt_isa == 'ppc64' and target_machine.endian() == 'little'
 	# Do not enable vsx by default.
 	# https://bugs.chromium.org/p/webm/issues/detail?id=1522
 	if not features.get('vsx', false)
-		rtcd_options += ['--disable-vsx']
+		rtcd_options += ['--disable', 'vsx']
 	endif
 
 	if tune_cpu.startswith('power')
@@ -922,7 +922,7 @@ elif tgt_isa.startswith('x86')
 		# See https://chromium-review.googlesource.com/c/webm/libvpx/+/751863
 		if c.version().version_compare('< 19.20.27508')
 			warning('This version of Visual Studio does not support avx512, disabling.....')
-			rtcd_options += ['--disable-avx512']
+			rtcd_options += ['--disable', 'avx512']
 			feature = 'avx512'
 			if not features.get(feature, false) # ! enabled
 				if not features.has(feature) # disabled
@@ -952,7 +952,7 @@ elif tgt_isa.startswith('x86')
 		# disable higher order extensions to simplify asm dependencies
 		if disable_exts
 			if features.get(ext, true)
-				rtcd_options += ['--disable-@0@'.format(ext)]
+				rtcd_options += ['--disable', ext]
 				message('\tdisabling @0@'.format(ext))
 				features.set(ext, false)
 			endif
@@ -963,7 +963,7 @@ elif tgt_isa.startswith('x86')
 				exts = ['avx512f', 'avx512cd', 'avx512bw', 'avx512dq', 'avx512vl']
 				foreach feature : exts
 					if features.get('gcc', false) and features.get(ext, true) and not c.has_argument('-m@0@'.format(feature))
-						rtcd_options += ['--disable-@0@'.format(ext)]
+						rtcd_options += ['--disable', ext]
 					else
 						if features.get(ext, true) # soft_enabled
 							if not features.has(ext)
@@ -985,7 +985,7 @@ elif tgt_isa.startswith('x86')
 				)
 					warning('disabling avx512: not supported by compiler')
 					features.set('avx512', false)
-					rtcd_options += ['--disable-avx512']
+					rtcd_options += ['--disable', 'avx512']
 				endif
 			else
 				# use the shortened version for the flag: sse4_1 -> sse4
@@ -998,7 +998,7 @@ elif tgt_isa.startswith('x86')
 				opt = ext
 				foreach feature : exts
 					if features.get('gcc', false) and features.get(opt, true) and not c.has_argument('-m@0@'.format(feature))
-						rtcd_options += ['--disable-@0@'.format(feature)]
+						rtcd_options += ['--disable', feature]
 					else
 						if features.get(opt, true) # soft_enabled
 							if not features.has(opt)
