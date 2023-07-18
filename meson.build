@@ -925,9 +925,9 @@ elif tgt_isa.startswith('x86')
 		endif
 	endif
 
-	x86_bits = 32
+	bits = 32
 	if target_machine.cpu_family() == 'x86_64'
-		x86_bits = 64
+		bits = 64
 	endif
 
 	feature = 'runtime_cpu_detect'
@@ -1005,27 +1005,18 @@ elif tgt_isa.startswith('x86')
 	endforeach
 
 	nasm_exe = find_program('nasm', required: false)
-	if meson.version().version_compare('> 1.1.0')
-		yasm_exe = find_program('yasm', required: false)
-	else
-		# Removing Yasm support because Meson adds optimization flags
-		# which it doesn't support.
-		# https://github.com/mesonbuild/meson/issues/11726
-		yasm_exe = disabler()
-	endif
-	# Adding Meson overrides manually.
+	yasm_exe = find_program('yasm', required: false)
+	as_exe = disabler()
 	if not nasm_exe.found() and not yasm_exe.found()
-		if host_machine.system() == 'windows'
-			nasm_exe = find_program('nasm_windows_exe')
-		elif host_machine.system() == 'darwin'
-			nasm_exe = find_program('nasm_macos_exe')
-		endif
+		subproject('nasm')
+		nasm_exe = find_program('nasm', required: false)
 	endif
 	if nasm_exe.found()
 		# Apple ships version 0.98 of nasm through at least Xcode 6. Revisit
 		# this check if they start shipping a compatible version.
 		out = run_command(nasm_exe, '-v', capture: true, check: true).stdout().strip()
 		as = 'nasm'
+		as_exe = nasm_exe
 		if out.contains('Apple')
 			warning('Unsupported version of nasm: @0@'.format(out))
 			as = 'auto'
@@ -1041,18 +1032,40 @@ elif tgt_isa.startswith('x86')
 		endif
 	elif yasm_exe.found()
 		as = 'yasm'
+		as_exe = yasm_exe
 	endif
 
 	if as == 'auto'
 		error('Neither yasm nor nasm have been found. See the prerequisites section in the README for more info.')
-	else
-		add_languages('nasm', required: true)
 	endif
 
 	as_sfx = '.asm'
 
-	# Nasm flags are Meson handled.
-	if tgt_os == 'iphonesimulator'
+	if tgt_os == 'windows'
+		asm_args += ['-f', 'win@0@'.format(bits)]
+		if get_option('debug')
+			if as == 'yasm'
+				asm_args += ['-g', 'cv8']
+			elif as == 'nasm'
+				asm_args += ['-g']
+			endif
+		endif
+	elif ['linux', 'solaris', 'android'].contains(tgt_os)
+		asm_args += ['-f', 'elf@0@'.format(bits)]
+		if get_option('debug')
+			if as == 'yasm'
+				asm_args += ['-g', 'dwarf2']
+			elif as == 'nasm'
+				asm_args += ['-g']
+			endif
+		endif
+	elif tgt_os == 'darwin'
+		asm_args += ['-f', 'macho@0@'.format(bits)]
+		if get_option('debug')
+			asm_args += ['-g']
+		endif
+	elif tgt_os == 'iphonesimulator'
+		asm_args += ['-f', 'macho@0@'.format(bits)]
 		sdk_version = run_command(xcrun_exe, '--sdk', tgt_os, '--show-sdk-version', check: true, capture: true)
 		if sdk_version.version_compare('> 8.0')
 			# yasm v1.3.0 doesn't know what -fembed-bitcode means, so turning it
@@ -1619,6 +1632,11 @@ if features.get('x86', false) or features.get('x86_64', false)
 		input: vpx_config_h,
 		output: 'vpx_config.asm',
 	)
+	asm_compiler = generator(
+		as_exe,
+		arguments: asm_args + ['-i', '@SOURCE_DIR@', '-o', '@OUTPUT@', '@INPUT@'],
+		output: '@PLAINNAME@.o'
+	)
 elif asm_conversion_exe.found()
 	ads_config_asm = configure_file(
 		command: [config_asm_generator, '@INPUT@', '@OUTPUT@'],
@@ -1630,12 +1648,14 @@ elif asm_conversion_exe.found()
 		input: ads_config_asm,
 		output: 'vpx_config.asm',
 	)
+	asm_compiler = disabler()
 else
 	config_asm = configure_file(
 		command: [config_asm_generator, '@INPUT@', '@OUTPUT@'],
 		input: vpx_config_h,
 		output: 'vpx_config.asm',
 	)
+	asm_compiler = disabler()
 endif
 
 rtcd_h_template = ['--arch=@0@'.format(tgt_isa), '--config=@INPUT0@'] + rtcd_options

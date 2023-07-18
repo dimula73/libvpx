@@ -90,7 +90,7 @@ if features.get('x86_64', false) # MANUAL
 	}
 
 	ports_asm_optional_sources += {
-		'msvs' : ports_asm_optional_sources['msvs'] +files(
+		'msvs' : ports_asm_optional_sources['msvs'] + files(
 			'float_control_word.asm'
 		),
 	}
@@ -135,14 +135,20 @@ optional_sources = get_variable('ports_asm_optional_sources', {})
 foreach comp_name, comp_sources : optional_sources
 	if not features.get(comp_name, false)
 		continue
-	elif ARCH_EXT_LIST.contains(comp_name)
-		transformed_sources = comp_sources
-		if asm_conversion_exe.found()
-			transformed_sources = asm_transformer.process(comp_sources)
+	elif (ARCH_EXT_LIST + ['msvs']).contains(comp_name) # MANUAL
+		if comp_sources.length() > 0
+			transformed_sources = comp_sources
+			if asm_conversion_exe.found()
+				transformed_sources = asm_transformer.process(comp_sources)
+			elif features.get('x86', false) or features.get('x86_64', false)
+				transformed_sources = asm_compiler.process(comp_sources,
+					preserve_path_from: meson.project_source_root()
+				)
+			endif
+			codec_arch_srcs += {
+				comp_name: codec_arch_srcs.get(comp_name, []) + transformed_sources
+			}
 		endif
-		codec_arch_srcs += {
-			comp_name: codec_arch_srcs.get(comp_name, []) + transformed_sources
-		}
 	else
 		codec_srcs += comp_sources
 	endif
