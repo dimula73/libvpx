@@ -1632,9 +1632,15 @@ if features.get('x86', false) or features.get('x86_64', false)
 		input: vpx_config_h,
 		output: 'vpx_config.asm',
 	)
+	# https://github.com/mesonbuild/meson/issues/11994
+	# Note that add_language("nasm") would just work
 	asm_compiler = generator(
 		as_exe,
-		arguments: asm_args + ['-i', '@SOURCE_DIR@', '-o', '@OUTPUT@', '@INPUT@'],
+		arguments: asm_args + [
+			'-i', meson.project_source_root(),
+			'-i', meson.project_build_root(),
+			'-o', '@OUTPUT@', '@INPUT@'
+		],
 		output: '@PLAINNAME@.o'
 	)
 elif asm_conversion_exe.found()
