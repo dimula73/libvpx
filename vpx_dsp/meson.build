@@ -442,7 +442,7 @@ if features.get('vp9_highbitdepth', false) # MANUAL
 endif
 
 # intra predictions
-if not features.get('postproc', false) or not features.get('vp9_postproc', false) # MANUAL
+if features.get('postproc', false) or features.get('vp9_postproc', false) # MANUAL
 	dsp_sources += files(
 		'add_noise.c',
 		'deblock.c',
@@ -870,7 +870,7 @@ if features.get('vp9', true) # MANUAL
 				'x86/highbd_idct16x16_add_sse2.c',
 				'x86/highbd_idct32x32_add_sse2.c',
 			),
-			'lsx' : dsp_optional_sources['lsx'] + files(
+			'sse4_1' : dsp_optional_sources['sse4_1'] + files(
 				'x86/highbd_idct4x4_add_sse4.c',
 				'x86/highbd_idct8x8_add_sse4.c',
 				'x86/highbd_idct16x16_add_sse4.c',
@@ -974,7 +974,7 @@ if features.get('vp9_encoder', false) # MANUAL
 			'sse2' : dsp_optional_sources['sse2'] + files(
 				'x86/highbd_quantize_intrin_sse2.c',
 			),
-			'avx2' : dsp_optional_sources['avx'] + files(
+			'avx2' : dsp_optional_sources['avx2'] + files(
 				'x86/highbd_quantize_intrin_avx2.c',
 			),
 			'neon' : dsp_optional_sources['neon'] + files(
@@ -1066,7 +1066,7 @@ if features.get('encoders', false) # MANUAL
 endif
 
 
-if not features.get('encoders', false) or not features.get('postproc', false) or not features.get('vp9_postproc', false) # MANUAL
+if features.get('encoders', false) or features.get('postproc', false) or features.get('vp9_postproc', false) # MANUAL
 	dsp_sources += files(
 		'variance.c',
 	)
@@ -1193,8 +1193,8 @@ foreach comp_name, comp_sources : optional_sources
 	if not features.get(comp_name, false)
 		continue
 	elif ARCH_EXT_LIST.contains(comp_name)
-		codec_arch_srcs += {
-			comp_name: codec_arch_srcs.get(comp_name, []) + comp_sources
+		codec_arch_headers += {
+			comp_name: codec_arch_headers.get(comp_name, []) + comp_sources
 		}
 	else
 		codec_headers += comp_sources

@@ -386,7 +386,7 @@ foreach flag: CMDLINE_SELECT
 		elif w >= 65536 or h >= 65536
 			error('Invalid size-limit: too big.')
 		else
-			var_list += ['DECODE_WIDTH_LIMIT', 'DECODE_HEIGHT_LIMIT']
+			VAR_LIST += ['DECODE_WIDTH_LIMIT', 'DECODE_HEIGHT_LIMIT']
 			features.set('DECODE_WIDTH_LIMIT', w)
 			features.set('DECODE_HEIGHT_LIMIT', h)
 			features.set('size_limit', true)
@@ -1460,7 +1460,7 @@ foreach feature : CONFIG_LIST
 endforeach
 
 foreach var : VAR_LIST
-	cfgdata.set10(var.to_upper(), features.get(var, false))
+	cfgdata.set(var.to_upper(), features.get(var, ''))
 endforeach
 
 version_str = 'v@0@'.format(meson.project_version())
