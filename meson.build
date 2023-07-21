@@ -1603,6 +1603,14 @@ else
 		'lsx': ['-mlsx'],
 		'lasx': ['-mlasx'],
 	}
+
+	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
+	# https://stackoverflow.com/questions/43152633/invalid-register-for-seh-savexmm-in-cygwin
+	if c.get_id() == 'gcc' and c.version().version_compare('<= 10.1.0')
+		arch_flags += {
+			'avx512': arch_flags['avx512'] + ['-fno-asynchronous-unwind-tables']
+		}
+	endif
 endif
 
 codec_arch_prereqs = []
