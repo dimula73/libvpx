@@ -340,7 +340,7 @@ vp9_common_asm_optional_sources = {
 }
 
 if features.get('vp9_postproc', false) # MANUAL
-	vp9_common_optional_sources += {
+	vp9_common_asm_optional_sources += {
 		'sse2': vp9_common_asm_optional_sources['sse2'] + files(
 			'common/x86/vp9_mfqe_sse2.asm'
 		)
@@ -420,7 +420,7 @@ if not features.get('realtime_only', false)
 		),
 	}
 
-	if not features.get('vp9_highbitdepth', true)
+	if features.get('vp9_highbitdepth', false)
 		vp9_cx_optional_sources += {
 			'sse4_1' : vp9_cx_optional_sources['sse4_1'] + files(
 				'encoder/x86/highbd_temporal_filter_sse4.c',
