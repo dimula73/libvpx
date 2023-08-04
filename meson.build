@@ -1809,6 +1809,41 @@ else
 	)
 endif
 
+headers = files(
+	'vpx/vpx_codec.h',
+	'vpx/vpx_frame_buffer.h',
+	'vpx/vpx_image.h',
+	'vpx/vpx_integer.h',
+)
+if features.get('vp8_encoder', false) or features.get('vp9_encoder', false)
+	headers += files(
+		'vpx/vp8.h',
+		'vpx/vp8cx.h',
+  		'vpx/vpx_ext_ratectrl.h',
+	)
+endif
+if features.get('vp8_decoder', false) or features.get('vp9_decoder', false)
+	headers += files(
+		'vpx/vp8.h',
+		'vpx/vp8dx.h',
+	)
+endif
+if features.get('decoders', false)
+	headers += files(
+		'vpx/vpx_decoder.h',
+	)
+endif
+if features.get('encoders', false)
+	headers += files(
+		'vpx/vpx_encoder.h',
+	)
+endif
+
+install_headers(
+	headers,
+	subdir: 'vpx'
+)
+
 libvpx_dep = declare_dependency(
 	link_with: libvpx,
 	dependencies: extra_libs,
