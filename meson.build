@@ -85,6 +85,7 @@ features.set('spatial_resampling', true)
 features.set('multithread', true)
 features.set('os_support', true)
 features.set('temporal_denoising', true)
+features.set('pic', get_option('b_staticpic'))
 
 CODECS = [
 	'vp8_encoder',
@@ -1209,7 +1210,7 @@ elif tgt_os == 'android'
 		project_c_args += ['-mstackrealign']
 		project_cpp_args += ['-mstackrealign']
 	endif
-	if c.get_linker_id().contains('lld') and tgt_isa == 'x86' and get_option('b_staticpic')
+	if c.get_linker_id().contains('lld') and tgt_isa == 'x86' and features.get('pic')
 		# Text relocations are required for all x86 objects. We
 		# must disable the warning to allow linking with lld. Unlike gold, ld which
 		# will silently allow text relocations, lld support must be explicit.
