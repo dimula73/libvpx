@@ -435,7 +435,7 @@ if features.get('vp9_highbitdepth', false) # MANUAL
 		'ssse3' : dsp_optional_sources['ssse3'] + files(
 			'x86/highbd_intrapred_intrin_ssse3.c',
 		),
-		'neon' : dsp_optional_sources['ssse3'] + files(
+		'neon' : dsp_optional_sources['neon'] + files(
 			'arm/highbd_intrapred_neon.c',
 		),
 	}
