@@ -30,6 +30,11 @@ rtcd_options = []
 link_args = []
 extra_libs = []
 
+project_c_args = []
+project_cpp_args = []
+project_c_link_args = []
+project_cpp_link_args = []
+
 libyuv_cpp_args = []
 
 #######################
@@ -663,8 +668,8 @@ if tgt_isa.startswith('arm')
 		if tgt_isa == 'armv7'
 			if features.get('neon', false) or features.get('neon_asm', false)
 				gcc_flags = ['-mfpu=neon']
-				add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c') #-ftree-vectorize
-				add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+				project_c_args += c.get_supported_arguments(gcc_flags) #-ftree-vectorize
+				project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 			endif
 		endif
 
@@ -680,8 +685,8 @@ if tgt_isa.startswith('arm')
 		if features.get('thumb', false)
 			asm_conversion_cmd += ['-thumb']
 			gcc_flags = ['-mthumb', '-Wa,-mimplicit-it=always']
-			add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c') #-ftree-vectorize
-			add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+			project_c_args += c.get_supported_arguments(gcc_flags) #-ftree-vectorize
+			project_cpp_args += cpp.get_supported_arguments(gcc_flags) #-ftree-vectorize
 		endif
 	elif tgt_cc == 'msvs'
 		# A number of ARM-based Windows platforms are constrained by their
@@ -771,8 +776,8 @@ elif tgt_isa.startswith('mips')
 	tune_cflags = '-mtune=@0@'
 
 	if features.get('dspr2', false)
-		add_project_arguments(c.get_supported_arguments('-mips2r32', '-mdspr2'), language: 'cpp')
-		add_project_arguments(cpp.get_supported_arguments('-mips2r32', '-mdspr2'), language: 'cpp')
+		project_c_args += c.get_supported_arguments('-mips2r32', '-mdspr2')
+		project_cpp_args += cpp.get_supported_arguments('-mips2r32', '-mdspr2')
 	endif
 
 	if features.get('runtime_cpu_detect', false)
@@ -782,14 +787,14 @@ elif tgt_isa.startswith('mips')
 	if tune_cpu != ''
 		if tune_cpu == 'p5600'
 			gcc_flags = ['-mips32r5', '-mload-store-pairs', '-msched-weight', '-mhard-float', '-mfp64']
-			add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-			add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+			project_c_args += c.get_supported_arguments(gcc_flags)
+			project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 		elif ['i6400', 'p6600'].contains(tune_cpu)
 			gcc_flags = ['-mips64r6', '-mabi=64', '-msched-weight', '-mload-store-pairs', '-mhard-float', '-mfp64']
-			add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-			add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
-			add_project_link_arguments(c.get_supported_link_arguments(gcc_flags), language: 'c')
-			add_project_link_arguments(cpp.get_supported_link_arguments(gcc_flags), language: 'cpp')
+			project_c_args += c.get_supported_arguments(gcc_flags)
+			project_cpp_args += cpp.get_supported_arguments(gcc_flags)
+			project_c_link_args += c.get_supported_link_arguments(gcc_flags)
+			project_cpp_link_args += cpp.get_supported_link_arguments(gcc_flags)
 		elif tune_cpu.startswith('loongson3')
 			if c.has_argument('-march=loongson3a')
 				feature = 'mmi'
@@ -842,7 +847,7 @@ elif tgt_isa.startswith('mips')
 		endif
 	endif
 
-	add_project_arguments(c.get_supported_arguments('-march=@0@'.format(tgt_isa)), language: 'c')
+	project_c_args += c.get_supported_arguments('-march=@0@'.format(tgt_isa))
 	# KPIC is a flag that is valid only for SunCC.
 	# As such, we'll use the Meson derived version.
 elif tgt_isa == 'ppc64' and target_machine.endian() == 'little'
@@ -867,8 +872,8 @@ elif tgt_isa.startswith('x86')
 	elif tgt_os == 'windows'
 		if features.get('gcc', false)
 			gcc_flags = ['-fno-common']
-			add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-			add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+			project_c_args += c.get_supported_arguments(gcc_flags)
+			project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 		endif
 	# Solaris is Meson handled, and OS/2 is unsupported by Meson.
 	endif
@@ -877,21 +882,21 @@ elif tgt_isa.startswith('x86')
 
 	if tgt_cc == 'icc'
 		gcc_flags = ['-use-msasm']
-		add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-		add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+		project_c_args += c.get_supported_arguments(gcc_flags)
+		project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 		# add -no-intel-extensions to suppress warning #10237
 		# refer to http://software.intel.com/en-us/forums/topic/280199
 		# Meson: -i-static is deprecated
 		# See https://www.cita.utoronto.ca/~merz/intel_c10b/main_cls/mergedProjects/copts_cls/common_options/option_i_static.htm
 		gcc_flags = ['-static-intel', '-no-intel-extensions']
-		add_project_link_arguments(c.get_supported_link_arguments(gcc_flags), language: 'c')
-		add_project_link_arguments(cpp.get_supported_link_arguments(gcc_flags), language: 'cpp')
+		project_c_link_args += c.get_supported_link_arguments(gcc_flags)
+		project_cpp_link_args += cpp.get_supported_link_arguments(gcc_flags)
 
 		if tgt_isa == 'x86_64'
 			# -ipo is LTO, -static and -O3 all are Meson handled
 			gcc_flags = ['-no-prec-div']
-			add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-			add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+			project_c_args += c.get_supported_arguments(gcc_flags)
+			project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 			# xiar is also Meson handled
 			if tune_cpu.startswith('atom')
 				tune_cflags = '-x'
@@ -905,8 +910,8 @@ elif tgt_isa.startswith('x86')
 		# #for 32 bit x86 builds, -O3 did not turn on this flag
 		if features.get('optimizations', false) and not features.get('gprof', true)
 			gcc_flags = ['-fomit-frame-pointer']
-			add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-			add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+			project_c_args += c.get_supported_arguments(gcc_flags)
+			project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 		endif
 	elif tgt_cc == 'msvs'
 		# Based on the Gerrit review, it seems the author intended to ban
@@ -1107,10 +1112,7 @@ endif
 # Try to enable CPU specific tuning
 if tune_cpu != ''
 	if tune_cflags != ''
-		add_project_arguments(
-			c.get_supported_arguments(tune_cflags.format(tune_cpu), checked: 'require'),
-			language: 'c'
-		)
+		project_c_args += c.get_supported_arguments(tune_cflags.format(tune_cpu), checked: 'require')
 	else
 		warning('CPU tuning not supported by this toolchain')
 	endif
@@ -1121,8 +1123,8 @@ endif
 if features.get('gprof', false)
 	gcc_flags = ['-pg']
 
-	add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-	add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+	project_c_args += c.get_supported_arguments(gcc_flags)
+	project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 endif
 
 # optimizations are Meson handled
@@ -1190,18 +1192,14 @@ endif
 
 # glibc needs these
 if features.get('linux', false)
-	add_project_arguments(
-		'-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64',
-		language: ['c', 'cpp']
-	)
+	project_c_args += ['-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64']
+	project_cpp_args += ['-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64']
 elif tgt_os == 'android'
 	api_level = c.get_define('__ANDROID_API__')
 	if api_level.version_compare('< 24') and tgt_isa == 'armv7'
 		warning('Disabling transparent large-file-support for Android API < 24 on armv7-a')
-		add_project_arguments(
-			'-U_FILE_OFFSET_BITS',
-			language: ['c', 'cpp']
-		)
+		project_c_args += ['-U_FILE_OFFSET_BITS']
+		project_cpp_args += ['-U_FILE_OFFSET_BITS']
 	endif
 endif
 
@@ -1226,37 +1224,34 @@ if features.get('gcc', false)
 		'-Wunused',
 	]
 
-	add_project_arguments(c.get_supported_arguments(gcc_flags), language: 'c')
-	add_project_arguments(cpp.get_supported_arguments(gcc_flags), language: 'cpp')
+	project_c_args += c.get_supported_arguments(gcc_flags)
+	project_cpp_args += cpp.get_supported_arguments(gcc_flags)
 
 	# gtest does not do well with
 	# these flags so add them explicitly to CFLAGS only.
-	add_project_arguments(c.get_supported_arguments('-Wundef'), language: 'c')
-	add_project_arguments(c.get_supported_arguments('-Wframe-larger-than=52000'), language: 'c')
+	project_c_args += c.get_supported_arguments('-Wundef')
+	project_c_args += c.get_supported_arguments('-Wframe-larger-than=52000')
 
 	if (features.get('mips', false) or features.get('INLINE', '') == '') and features.get('extra_warnings', false)
-		add_project_arguments(c.get_supported_arguments('-Wno-unused-function'), language: 'c')
-		add_project_arguments(cpp.get_supported_arguments('-Wno-unused-function'), language: 'cpp')
+		project_c_args += c.get_supported_arguments('-Wno-unused-function')
+		project_cpp_args += cpp.get_supported_arguments('-Wno-unused-function')
 	endif
 
 	# Avoid this warning for third_party C++ sources. Some reorganization
 	# would be needed to apply this only to test/*.cc.
-	add_project_arguments(c.get_supported_arguments('-Wshorten-64-to-32'), language: 'c')
+	project_c_args += c.get_supported_arguments('-Wshorten-64-to-32')
 
 	# Quiet gcc 6 vs 7 abi warnings:
 	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
 	if features.get('arm', false)
-		add_project_arguments(cpp.get_supported_arguments('-Wno-psabi'), language: 'cpp')
+		project_cpp_args += cpp.get_supported_arguments('-Wno-psabi')
 	endif
 
 	# Enforce C++11 compatibility.
-	add_project_arguments(
-		cpp.get_supported_arguments(
-			'-Wc++14-extensions',
-			'-Wc++17-extensions',
-			'-Wc++20-extensions',
-		),
-		language: 'cpp'
+	project_cpp_args += cpp.get_supported_arguments(
+		'-Wc++14-extensions',
+		'-Wc++17-extensions',
+		'-Wc++20-extensions',
 	)
 	# disable some warnings specific to libyuv.
 	libyuv_cpp_args += cpp.get_supported_arguments(
@@ -1276,8 +1271,8 @@ if features.get('icc', false)
 		'-fp-model=precise',
 	]
 
-	add_project_arguments(c.get_supported_arguments(icc_flags), language: 'c')
-	add_project_arguments(cpp.get_supported_arguments(icc_flags), language: 'cpp')
+	project_c_args += c.get_supported_arguments(icc_flags)
+	project_cpp_args += cpp.get_supported_arguments(icc_flags)
 endif
 
 # Enable extra, harmless warnings. These might provide additional insight
@@ -1291,10 +1286,10 @@ extra_warnings = [
 ]
 
 if features.get('extra_warnings', false)
-	add_project_arguments(c.get_supported_arguments(extra_warnings), language: 'c')
+	project_c_args += c.get_supported_arguments(extra_warnings)
 	if features.get('gcc', false) and features.get('werror', false)
 		foreach w: extra_warnings
-			add_project_arguments(c.get_supported_arguments('-Wno-error=@0@'.format(w)), language: 'c')
+			project_c_args += c.get_supported_arguments('-Wno-error=@0@'.format(w))
 		endforeach
 	endif
 endif
@@ -1315,10 +1310,8 @@ if tgt_cc == 'msvs'
 		features.set('solution', true)
 	endif
 	features.set('INLINE', '__inline')
-	add_project_arguments(
-		'-D_CRT_SECURE_NO_WARNINGS', '-D_CRT_SECURE_NO_DEPRECATE',
-		language: ['c', 'cpp']
-	)
+	project_c_args += ['-D_CRT_SECURE_NO_WARNINGS', '-D_CRT_SECURE_NO_DEPRECATE']
+	project_cpp_args += ['-D_CRT_SECURE_NO_WARNINGS', '-D_CRT_SECURE_NO_DEPRECATE']
 endif
 
 # Other toolchain specific defaults
@@ -1350,7 +1343,7 @@ if tgt_cc == 'msvs'
 elif tgt_os == 'android'
 	enable_features = ['libyuv']
 	if cpp.has_argument('-std=gnu++11')
-		add_project_arguments('-std=gnu++11', language: 'cpp')
+		project_cpp_args += '-std=gnu++11'
 		enable_features += ['webm_io']
 	endif
 	foreach feature: enable_features
@@ -1369,7 +1362,7 @@ elif tgt_os == 'darwin'
 elif target_machine.system() == 'iphonesimulator'
 	enable_features = ['libyuv']
 	if cpp.has_argument('-std=gnu++11')
-		add_project_arguments('-std=gnu++11', language: 'cpp')
+		project_cpp_args += '-std=gnu++11'
 		enable_features += ['webm_io']
 	endif
 	foreach feature: enable_features
@@ -1386,7 +1379,7 @@ elif target_machine.system() == 'windows'
 	# would be disabled for the same reason.
 	enable_features = []
 	if cpp.has_argument('-std=gnu++11')
-		add_project_arguments('-std=gnu++11', language: 'cpp')
+		project_cpp_args += '-std=gnu++11'
 		enable_features += ['unit_tests', 'webm_io']
 	endif
 	if cpp.compiles('int z;')
@@ -1403,7 +1396,7 @@ elif target_machine.system() == 'windows'
 else
 	enable_features = []
 	if cpp.has_argument('-std=gnu++11')
-		add_project_arguments('-std=gnu++11', language: 'cpp')
+		project_cpp_args += '-std=gnu++11'
 		if features.get('pthread_h', false)
 			enable_features += ['unit_tests']
 		endif
@@ -1778,7 +1771,7 @@ foreach arch, srcs : codec_arch_srcs
 		'vpx-@0@'.format(arch),
 		codec_arch_prereqs + srcs,
 		extra_files: codec_arch_headers.get(comp_name, []),
-		c_args: arch_flags.get(arch, []),
+		c_args: arch_flags.get(arch, []) + project_c_args,
 		dependencies: extra_libs,
 	)
 endforeach
@@ -1787,7 +1780,8 @@ if features.get('static', false) and features.get('shared', false)
 	libvpx = both_libraries(
 		'vpx',
 		codec_srcs,
-		link_args: link_args,
+		c_args: project_c_args,
+		link_args: project_c_link_args + link_args,
 		extra_files: codec_headers,
 		dependencies: extra_libs,
 		link_whole: codec_arch_libs,
@@ -1799,7 +1793,8 @@ else
 	libvpx = library(
 		'vpx',
 		codec_srcs,
-		link_args: link_args,
+		c_args: project_c_args,
+		link_args: project_c_link_args + link_args,
 		extra_files: codec_headers,
 		dependencies: extra_libs,
 		link_whole: codec_arch_libs,
@@ -1898,6 +1893,8 @@ if features.get('unit_tests', false)
 		vpxrc_lib = static_library(
 			'vpxrc',
 			rc_rtc_srcs,
+			c_args: project_c_args,
+			link_args: project_c_link_args,
 			extra_files: codec_headers + rc_rtc_headers,
 			dependencies: extra_libs + libvpx_dep,
 		)
