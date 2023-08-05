@@ -280,6 +280,7 @@ iOS arm64 cross:
     ANDROID_NDK: '/android/ndk'
     ANDROID_API: '21'
     TOOLCHAIN: "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64"
+    CPUFEATURES: "$ANDROID_NDK/sources/android/cpufeatures"
     NASM: "/usr/bin/nasm"
   before_script:
     - dnf install -y python3-pip binutils nasm gcc ninja-build
@@ -312,7 +313,7 @@ iOS arm64 cross:
       nasm      = '$NASM'
       pkgconfig = 'false'
       EOF
-    - meson setup mesonbuild --cross-file android-cross-file.txt
+    - meson setup mesonbuild --cross-file android-cross-file.txt -Dcpu_features_path=$CPUFEATURES
     - meson compile -C mesonbuild
 
 android arm64 cross:

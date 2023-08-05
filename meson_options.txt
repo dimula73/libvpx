@@ -47,3 +47,8 @@ option('vp8_decoder', type: 'feature', description: 'Enable the VP8 decoder only
 option('vp9_encoder', type: 'feature', description: 'Enable the VP9 encoder only')
 option('vp9_decoder', type: 'feature', description: 'Enable the VP9 decoder only')
 #### --- END GENERATED EXTERN OPTIONS --- ####
+option(
+  'cpu_features_path',
+  type : 'string',
+  description : 'Path to platform-specific cpu-features.[ch] for systems that do not provide it (e.g. Android)',
+)

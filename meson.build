@@ -1196,10 +1196,27 @@ if features.get('linux', false)
 	project_cpp_args += ['-D_LARGEFILE_SOURCE', '-D_FILE_OFFSET_BITS=64']
 elif tgt_os == 'android'
 	api_level = c.get_define('__ANDROID_API__')
-	if api_level.version_compare('< 24') and tgt_isa == 'armv7'
+	if api_level.version_compare('< 24')
 		warning('Disabling transparent large-file-support for Android API < 24 on armv7-a')
 		project_c_args += ['-U_FILE_OFFSET_BITS']
 		project_cpp_args += ['-U_FILE_OFFSET_BITS']
+	endif
+
+	if api_level.version_compare('< 24') and tgt_isa == 'x86'
+		warning('''x86 targets prior to Android Nougat (API 24) need
+		-mstackrealign to properly align stack for global constructors.
+		See https://github.com/android-ndk/ndk/issues/635''')
+		project_c_args += ['-mstackrealign']
+		project_cpp_args += ['-mstackrealign']
+	endif
+	if c.get_linker_id().contains('lld') and tgt_isa == 'x86' and get_option('b_staticpic')
+		# Text relocations are required for all x86 objects. We
+		# must disable the warning to allow linking with lld. Unlike gold, ld which
+		# will silently allow text relocations, lld support must be explicit.
+		#
+		# See https://crbug.com/911658#c19 for more information. See also
+		# https://trac.ffmpeg.org/ticket/7878
+		project_c_link_args += ['-Wl,-z,notext']
 	endif
 endif
 
@@ -1606,6 +1623,26 @@ else
 	endif
 endif
 
+if tgt_os == 'android'
+	# Android cpu-features
+	cpu_features_path = get_option('cpu_features_path')
+	cpu_features_sources = []
+	cpu_features_inc = []
+	if cpu_features_path == ''
+		error('cpu-features is a required Android component')
+	endif
+	message('Using cpu-features.[ch] from ' + cpu_features_path)
+	cpu_features_sources = files(
+		cpu_features_path / 'cpu-features.h',
+		cpu_features_path / 'cpu-features.c',
+	)
+	cpu_features_inc = include_directories(cpu_features_path)
+	codec_srcs += cpu_features_sources
+	extra_libs += declare_dependency(
+		include_directories: cpu_features_inc
+	)
+endif
+
 codec_arch_prereqs = []
 codec_arch_srcs = {}
 codec_arch_headers = {}
@@ -1772,6 +1809,7 @@ foreach arch, srcs : codec_arch_srcs
 		codec_arch_prereqs + srcs,
 		extra_files: codec_arch_headers.get(comp_name, []),
 		c_args: arch_flags.get(arch, []) + project_c_args,
+		link_args: project_c_link_args,
 		dependencies: extra_libs,
 	)
 endforeach
