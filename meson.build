@@ -525,8 +525,8 @@ c = meson.get_compiler('c')
 cpp = meson.get_compiler('cpp')
 asm = meson.get_compiler('c') # asm == GCC
 
-tgt_isa = target_machine.cpu_family()
-tgt_os = target_machine.system()
+tgt_isa = host_machine.cpu_family()
+tgt_os = host_machine.system()
 tgt_cc = c.get_id()
 
 if tgt_isa == 'arm'
@@ -541,27 +541,26 @@ endif
 
 if tgt_os == 'windows' or tgt_os == 'cygwin'
 	tgt_os = 'windows'
-elif ['darwin', 'ios', 'tvos'].contains(tgt_os)
+elif ['darwin', 'ios', 'tvos', 'iphonesimulator'].contains(tgt_os)
 	# The gcc -dumpmachine bit is used to force -mmacosx-version-min/max
 	warning('Apple target detected, please supply the --m(macos|ios)-version-* and -isysroot flags through -Dc_flags or a native file')
 
-	if tgt_os == 'darwin'
-		# Detect if iOS, tvOS...
-		xcrun_exe = find_program('xcrun', required: true)
+	# Detect if iOS, tvOS...
+	xcrun_exe = find_program('xcrun', required: true)
 
-		# The only one actually used is the iPhone simulator-- see later
-		# is_ios = c.get_define('TARGET_OS_MAC', prefix: '#include <TargetConditionals.h>')
-		# is_tvos = c.get_define('TARGET_OS_TV', prefix: '#include <TargetConditionals.h>')
-		is_simulator = c.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>')
+	# The only one actually used is the iPhone simulator-- see later
+	# is_ios = c.get_define('TARGET_OS_IOS', prefix: '#include <TargetConditionals.h>')
+	# is_tvos = c.get_define('TARGET_OS_TV', prefix: '#include <TargetConditionals.h>')
+	is_simulator = c.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>')
 
-		# if is_ios.to_int() == 1
-		# 	tgt_os = 'ios'
-		# elif is_tvos.to_int() == 1
-		# 	tgt_os = 'tvos'
-		# el
-		if is_simulator.to_int() == 1
-			tgt_os = 'iphonesimulator'
-		endif
+	# if is_ios.to_int() == 1
+	# 	tgt_os = 'ios'
+	# elif is_tvos.to_int() == 1
+	# 	tgt_os = 'tvos'
+	if is_simulator.to_int() == 1
+		tgt_os = 'iphonesimulator'
+	else
+		tgt_os = 'darwin'
 	endif
 elif tgt_os == 'linux' or tgt_os.endswith('bsd')
 	tgt_os = 'linux'
@@ -1073,7 +1072,7 @@ elif tgt_isa.startswith('x86')
 	elif tgt_os == 'iphonesimulator'
 		asm_args += ['-f', 'macho@0@'.format(bits)]
 		sdk_version = run_command(xcrun_exe, '--sdk', tgt_os, '--show-sdk-version', check: true, capture: true)
-		if sdk_version.version_compare('> 8.0')
+		if sdk_version.stdout().strip().version_compare('> 8.0')
 			# yasm v1.3.0 doesn't know what -fembed-bitcode means, so turning it
 			# on is pointless (unless building a C-only lib). Warn the user, but
 			# do nothing here.
@@ -1377,7 +1376,7 @@ elif tgt_os == 'darwin'
 	# Meson already handles the cpp_std flag.
 	# iOS/ARM builds do not work with gtest. This does not match
 	# x86 targets.
-elif target_machine.system() == 'iphonesimulator'
+elif tgt_os == 'iphonesimulator'
 	enable_features = ['libyuv']
 	if cpp.has_argument('-std=gnu++11')
 		project_cpp_args += '-std=gnu++11'
@@ -1815,6 +1814,12 @@ foreach arch, srcs : codec_arch_srcs
 	)
 endforeach
 
+# Work around iOS simulator refusing to link_whole static libraries
+objs = []
+foreach i: codec_arch_libs
+	objs += i.extract_all_objects(recursive: true)
+endforeach
+
 if features.get('static', false) and features.get('shared', false)
 	libvpx = both_libraries(
 		'vpx',
@@ -1823,7 +1828,7 @@ if features.get('static', false) and features.get('shared', false)
 		link_args: project_c_link_args + link_args,
 		extra_files: codec_headers,
 		dependencies: extra_libs,
-		link_whole: codec_arch_libs,
+		objects: objs,
 		version: soversion,
 		vs_module_defs: vpx_def,
 		install: features.get('install_libs'),
@@ -1836,7 +1841,7 @@ else
 		link_args: project_c_link_args + link_args,
 		extra_files: codec_headers,
 		dependencies: extra_libs,
-		link_whole: codec_arch_libs,
+		objects: objs,
 		version: soversion,
 		vs_module_defs: vpx_def,
 		install: features.get('install_libs'),
