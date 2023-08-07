@@ -1443,7 +1443,6 @@ endif
 
 features.set('unistd_h', c.has_header('unistd.h'))
 if c.has_header('vpx/vpx_integer.h', include_directories: include_directories('.'))
-	features.set('vpx_vpx_integer_h', true)
 	features.set('vpx_ports', true)
 endif
 
@@ -1883,10 +1882,17 @@ install_headers(
 	subdir: 'vpx'
 )
 
+dep_vars = {}
+
+foreach have : CMDLINE_SELECT
+	dep_vars += { have: features.get(have, false).to_string() }
+endforeach
+
 libvpx_dep = declare_dependency(
 	link_with: libvpx,
 	dependencies: extra_libs,
 	include_directories: include_directories('.'),
+	variables: dep_vars,
 )
 
 meson.override_dependency('vpx', libvpx_dep)
