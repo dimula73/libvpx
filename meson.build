@@ -1144,7 +1144,8 @@ endif
 
 # Almost every platform uses pthreads.
 if features.get('multithread', false)
-	threads_dep = c.find_library('threads', required: false)
+	threads_dep = dependency('threads', required: false)
+	extra_libs += threads_dep
 	if c.compiles('''
 		#include <pthread.h>
 		#include <stddef.h>
@@ -1152,7 +1153,7 @@ if features.get('multithread', false)
 		name: 'supports pthreads',
 		dependencies: threads_dep
 	)
-		extra_libs += threads_dep
+		features.set('pthread_h', true)
 	else
 		features.set('pthread_h', false)
 	endif
