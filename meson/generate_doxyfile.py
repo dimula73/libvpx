@@ -18,6 +18,7 @@ if __name__ == '__main__':
 	parser.add_argument('--strip', nargs='+', type=Path, help='Make paths inside this directory relative')
 	parser.add_argument('--example-path', nargs='+', type=Path, help='Directory that contains example code fragments')
 	parser.add_argument('--output', type=FileType('w', encoding='utf-8'), required=True, help='Write to this file')
+	parser.add_argument('root', type=Path, help='Root for the Doxygen output')
 	parser.add_argument('inputs', nargs='+', type=Path, help='Inputs for the Doxygen documentation')
 	args = parser.parse_args()
 
@@ -29,7 +30,7 @@ if __name__ == '__main__':
 		with file.open(encoding='utf-8') as input:
 			f.write(input.read())
 	f.write('# MESON override OUTPUT_DIR\n')
-	f.write('OUTPUT_DIRECTORY       = \n')
+	f.write(f'OUTPUT_DIRECTORY       = {args.root}\n')
 	if args.strip is not None:
 		paths_to_strip: str = ' '.join([f.as_posix() for f in args.strip])
 		f.write(f'STRIP_FROM_PATH += {paths_to_strip}\n')

@@ -2017,6 +2017,7 @@ if features.get('install_docs', false)
 			'--strip', meson.current_source_dir(), meson.current_build_dir(),
 			'--example-path', example_path,
 			'--output', '@OUTPUT@',
+			meson.current_build_dir(),
 			'@INPUT@'],
 		output: 'Doxyfile',
 		input: codec_dox
