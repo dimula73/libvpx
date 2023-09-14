@@ -1146,7 +1146,7 @@ endif
 if features.get('multithread', false)
 	threads_dep = dependency('threads', required: false)
 	extra_libs += threads_dep
-	if c.compiles('''
+	if c.links('''
 		#include <pthread.h>
 		#include <stddef.h>
 		int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }''',
