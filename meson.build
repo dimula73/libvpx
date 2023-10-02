@@ -4,7 +4,7 @@
 project(
 	'libvpx',
 	'c', 'cpp',
-	version: '1.13.0',
+	version: '1.13.1',
 	default_options: [
 		# Enforce c89 for c files. Don't be too strict about it though. Allow
 		# gnu extensions like "//" for comments.
