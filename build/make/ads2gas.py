@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from argparse import ArgumentParser
+from typing import List
 import re
 import sys
 import thumb
@@ -23,7 +24,7 @@ if __name__ == '__main__':
         print('\t.thumb')
 
     # Stack of procedure names.
-    proc_stack: list[str] = []
+    proc_stack: List[str] = []
 
     f = iter(sys.stdin.readlines())
     for line in f:
