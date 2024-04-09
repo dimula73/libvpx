@@ -936,11 +936,11 @@ elif tgt_isa.startswith('x86')
 	endif
 
 	feature = 'runtime_cpu_detect'
-	if features.get(tgt_isa, true) # soft_enabled
-		if not features.has(tgt_isa)
-			message('\tenabling @0@'.format(tgt_isa))
+	if features.get(feature, true) # soft_enabled
+		if not features.has(feature)
+			message('\tenabling @0@'.format(feature))
 		endif
-		features.set(tgt_isa, true)
+		features.set(feature, true)
 	endif
 
 	# Unline the original, we do can test cflags here :)
