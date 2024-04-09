@@ -1587,9 +1587,9 @@ if tgt_cc == 'msvs'
 		'sse3': [],
 		'ssse3': [],
 		'sse4_1': [],
-		'avx': c.get_supported_arguments('-march:avx'),
-		'avx2': c.get_supported_arguments('-march:avx2'),
-		'avx512': c.get_supported_arguments('-march:avx512'),
+		'avx': c.get_supported_arguments('/arch:AVX'),
+		'avx2': c.get_supported_arguments('/arch:AVX2'),
+		'avx512': c.get_supported_arguments('/arch:AVX512'),
 	}
 else
 	arch_flags = {
