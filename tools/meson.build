@@ -28,7 +28,7 @@ tiny_ssim = executable(
 	link_args: project_c_link_args + link_args,
 	extra_files: tiny_ssim_headers,
 	dependencies: libvpx_dep,
-	install: get_option('install_bins'),
+	install: features.get('install_bins', false),
 )
 
 tools_subpages = {
