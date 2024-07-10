@@ -1563,6 +1563,14 @@ vpx_config_c = configure_file(
 
 # libs.mk
 
+if features.get('shared', false) and not ['linux', 'darwin', 'ios', 'iphonesimulator'].contains(tgt_os)
+	if features.enabled('gnu', false)
+		warn('Shared libraries are only supported on ELF; assuming this is OK')
+	else
+		error('Shared libraries are only supported on ELF, OS/2, and Darwin for now')
+	endif
+endif
+
 rtcd_exe = find_program('build/make/rtcd.py', required: true)
 
 extra_libs += c.find_library('m', required: false)
@@ -1820,33 +1828,18 @@ foreach i: codec_arch_libs
 	objs += i.extract_all_objects(recursive: true)
 endforeach
 
-if features.get('static', false) and features.get('shared', false)
-	libvpx = both_libraries(
-		'vpx',
-		codec_srcs,
-		c_args: project_c_args,
-		link_args: project_c_link_args + link_args,
-		extra_files: codec_headers,
-		dependencies: extra_libs,
-		objects: objs,
-		version: soversion,
-		vs_module_defs: vpx_def,
-		install: features.get('install_libs'),
-	)
-else
-	libvpx = library(
-		'vpx',
-		codec_srcs,
-		c_args: project_c_args,
-		link_args: project_c_link_args + link_args,
-		extra_files: codec_headers,
-		dependencies: extra_libs,
-		objects: objs,
-		version: soversion,
-		vs_module_defs: vpx_def,
-		install: features.get('install_libs'),
-	)
-endif
+libvpx = library(
+	'vpx',
+	codec_srcs,
+	c_args: project_c_args,
+	link_args: project_c_link_args + link_args,
+	extra_files: codec_headers,
+	dependencies: extra_libs,
+	objects: objs,
+	version: soversion,
+	vs_module_defs: vpx_def,
+	install: features.get('install_libs'),
+)
 
 headers = files(
 	'vpx/vpx_codec.h',
