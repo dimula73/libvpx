@@ -1569,7 +1569,7 @@ vpx_config_c = configure_file(
 # libs.mk
 
 if features.get('shared', false) and not ['linux', 'darwin', 'ios', 'iphonesimulator'].contains(tgt_os)
-	if features.enabled('gnu', false)
+	if features.get('gnu', false)
 		warn('Shared libraries are only supported on ELF; assuming this is OK')
 	else
 		error('Shared libraries are only supported on ELF, OS/2, and Darwin for now')
